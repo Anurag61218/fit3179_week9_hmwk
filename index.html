@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PM2.5 Air Pollution - Indian Cities (WHO Data)</title>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        #vis {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PM2.5 Air Pollution in Major Indian Cities</h1>
+        <div class="description">
+            Circle size represents PM2.5 concentration • Color indicates WHO air quality categories • Sub-dataset derived from WHO Ambient Air Quality Database V6.1 (2024)
+        </div>
+        <div id="vis"></div>
+    </div>
+
+    <script type="text/javascript">
+        var vlSpec = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "title": {
+                "text": "PM2.5 Air Pollution in Major Indian Cities",
+                "subtitle": "Annual mean PM2.5 concentrations (μg/m^3) • Data from WHO Database 2023",
+                "fontSize": 16,
+                "anchor": "start",
+                "offset": 20
+            },
+            "width": 900,
+            "height": 600,
+            "projection": {
+                "type": "mercator",
+                "center": [78, 20],
+                "scale": 1000
+            },
+            "resolve": {
+                "scale": {
+                    "color": "independent",
+                    "size": "independent"
+                }
+            },
+            "layer": [
+                {
+                    "data": {
+                        "url": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"
+                    },
+                    "mark": {
+                        "type": "geoshape",
+                        "fill": "#e8e8e8",
+                        "stroke": "#999999",
+                        "strokeWidth": 0.5
+                    }
+                },
+                {
+                    "data": {
+                        "graticule": {"step": [10, 10]}
+                    },
+                    "mark": {
+                        "type": "geoshape",
+                        "fill": null,
+                        "stroke": "#cccccc",
+                        "strokeWidth": 0.3,
+                        "strokeOpacity": 0.7
+                    }
+                },
+                {
+                    "data": {
+                        "url": "./india_air_quality_subdataset.csv",
+                        "format": {"type": "csv"}
+                    },
+                    "mark": {
+                        "type": "circle",
+                        "opacity": 0.8,
+                        "stroke": "white",
+                        "strokeWidth": 1.5
+                    },
+                    "encoding": {
+                        "longitude": {"field": "Longitude", "type": "quantitative"},
+                        "latitude": {"field": "Latitude", "type": "quantitative"},
+                        "size": {
+                            "field": "PM2_5_Annual_Mean",
+                            "type": "quantitative",
+                            "scale": {
+                                "type": "linear",
+                                "range": [150, 800],
+                                "domain": [30, 110]
+                            },
+                            "legend": {
+                                "title": "PM2.5 (µg/m^3)",
+                                "titleFontSize": 12,
+                                "labelFontSize": 10,
+                                "orient": "bottom-left",
+                                "offset": 10
+                            }
+                        },
+                        "color": {
+                            "field": "PM_2_5_Annual_Mean",
+                            "type": "quantitative",
+                            "scale": {
+                                "type": "threshold",
+                                "domain": [15, 35, 75],
+                                "range": ["#2E8B57", "#FFD700", "#FF6347", "#8B0000"]
+                            },
+                            "legend": {
+                                "title": "WHO Air Quality",
+                                "titleFontSize": 12,
+                                "labelFontSize": 10,
+                                "orient": "bottom-right",
+                                "offset": 10,
+                                "values": [15, 35, 75],
+                                "labelExpr": "datum.value == 15 ? 'Good (<= 15)' : datum.value == 35 ? 'Moderate (15-35)' : datum.value == 75 > 'Unhealthy (35-75)' : 'Very Unhealthy (>75)'"
+                            }
+                        },
+                        "tooltip": [
+                            {"field": "City", "type": "nominal", "title": "City"},
+                            {"field": "State", "type": "nominal", "title": "State"},
+                            {"field": "PM2_5_Annual_Mean", "type": "quantitative", "title": "PM2.5 (µg/m^3)", "format": ".1f"},
+                            {"field": "PM10_Annual_Mean", "type": "quantitative", "title": "PM10 (µg/m^3)", "format": ".1f"},
+                            {"field": "Population_Category", "type": "nominal", "title": "Population"},
+                            {"field": "Source_Station_Count", "type": "quantitative", "title": "Monitoring Stations"}
+                        ]
+                    }
+                }
+            ]
+        };
+
+        vegaEmbed('#vis', vlSpec, {
+            "actions": false,
+            "theme": "googlecharts"
+        }).then(function(result) {
+            console.log("Visualization rendered successfully");
+        }).catch(console.error);
+    </script>
+</body>
+</html>

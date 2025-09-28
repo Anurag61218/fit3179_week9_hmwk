@@ -1,0 +1,21 @@
+﻿City,State,Country,Latitude,Longitude,PM2_5_Annual_Mean,PM10_Annual_Mean,Year,Source_Citation_Count,Population_Category
+Delhi,Delhi,India,28.6139,77.209,106.6,268,2023,12,>10M
+Mumbai,Maharashtra,India,19.076,72.8777,58.1,138.4,2023,8,>10M
+Kolkata,West Bengal,India,22.5726,88.3639,77.2,176.3,2023,6,>10M
+Bangalore,Karnataka,India,12.9716,77.5946,51.9,104.8,2023,5,5-10M
+Chennai,Tamil Nadu,India,13.0827,80.2707,46.7,95.2,2023,7,5-10M
+Hyderabad,Telangana,India,17.385,78.4867,55.3,118.6,2023,6,5-10M
+Pune,Maharashtra,India,18.5204,73.8567,49.8,102.1,2023,4,5-10M
+Ahmedabad,Gujarat,India,23.0225,72.5714,62.4,134.7,2023,5,5-10M
+Jaipur,Rajasthan,India,26.9214,75.7873,71.3,156.8,2023,3,1-5M
+Lucknow,Uttar Pradesh,India,26.8467,80.9462,89.2,198.4,2023,4,1-5M
+Kanpur,Uttar Pradesh,India,26.4499,80.3319,95.7,212.3,2023,3,1-5M
+Patna,Bihar,India,25.5941,85.1376,101.4,225.6,2023,2,1-5M
+Guwahati,Assam,India,26.1445,91.7362,43.8,89.7,2023,2,1-5M
+Bhopal,Madhya Pradesh,India,23.2599,77.4126,67.9,145.2,2023,3,1-5M
+Indore,Madhya Pradesh,India,22.7196,75.8577,72.1,158.9,2023,2,1-5M
+Nagpur,Maharashtra,India,21.1458,79.0882,59.6,128.3,2023,3,1-5M
+Visakhapatnam,Andhra Pradesh,India,17.6868,83.2185,41.2,84.6,2023,2,1-5M
+Kochi,Kerala,India,9.9312,76.2673,31.4,67.8,2023,2,0.5-1M
+Coimbatore,Tamil Nadu,India,11.0168,76.9558,36.7,78.2,2023,2,0.5-1M
+Vadodara,Gujarat,India,22.3072,73.1812,57.3,119.4,2023,2,1-5M
