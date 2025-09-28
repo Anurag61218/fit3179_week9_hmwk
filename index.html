@@ -23,6 +23,11 @@
         }
         h1 {
             text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .description{
+            text-align: center;
             color: #666;
             margin-bottom: 20px;
             font-size: 14px;
@@ -121,7 +126,7 @@
                             }
                         },
                         "color": {
-                            "field": "PM_2_5_Annual_Mean",
+                            "field": "PM2_5_Annual_Mean",
                             "type": "quantitative",
                             "scale": {
                                 "type": "threshold",
@@ -135,7 +140,7 @@
                                 "orient": "bottom-right",
                                 "offset": 10,
                                 "values": [15, 35, 75],
-                                "labelExpr": "datum.value == 15 ? 'Good (<= 15)' : datum.value == 35 ? 'Moderate (15-35)' : datum.value == 75 > 'Unhealthy (35-75)' : 'Very Unhealthy (>75)'"
+                                "labelExpr": "datum.value == 15 ? 'Good (<= 15)' : datum.value == 35 ? 'Moderate (15-35)' : datum.value == 75 ? 'Unhealthy (35-75)' : 'Very Unhealthy (>75)'"
                             }
                         },
                         "tooltip": [
@@ -159,4 +164,5 @@
         }).catch(console.error);
     </script>
 </body>
+
 </html>
