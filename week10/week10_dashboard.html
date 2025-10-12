@@ -134,12 +134,12 @@
             },
             "params": [
                 {
-                    "name": "city_selection",
+                    "name": "ts_city_selection",
                     "select": {"type": "point", "fields": ["City"]},
                     "bind": "legend"
                 },
                 {
-                    "name": "date_range",
+                    "name": "ts_date_range",
                     "value": [{"year": 2023, "month": 1}, {"year": 2023, "month": 12}],
                     "select": {
                         "type": "interval",
@@ -149,7 +149,7 @@
             ],
             "transform": [
                 {
-                    "filter": {"param": "date_range"}
+                    "filter": {"param": "ts_date_range"}
                 }
             ],
             "layer": [
@@ -203,11 +203,11 @@
                             }
                         },
                         "opacity": {
-                            "condition": {"param": "city_selection", "value": 1},
+                            "condition": {"param": "ts_city_selection", "value": 1},
                             "value": 0.1
                         },
                         "strokeWidth": {
-                            "condition": {"param": "city_selection", "value": 3},
+                            "condition": {"param": "ts_city_selection", "value": 3},
                             "value": 1
                         },
                         "tooltip": [
