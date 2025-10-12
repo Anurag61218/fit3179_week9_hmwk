@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task 1 - Interactive Time Series</title>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196F3;
+        }
+        #vis {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PM2.5 Monthly Trends - Interactive Time Series</h1>
+        <div class="info-box">
+            <strong>Interactive Features:</strong>
+            <ul>
+                <li><strong>Legend Selection:</strong> Click the city names to show/hide specific cities</li>
+                <li><strong>Interval Selection:</strong> Drag on the chart to select a time range</li>
+                <li><strong>Tooltips:</strong> Hover over data points for detailed information</li>
+                <li><strong>Annotations:</strong> Red and orange lines mark WHO thresholds; text labels highlight key pollution events</li>
+            </ul>
+        </div>
+        <div id="vis"></div>
+    </div>
+
+    <script type="text/javascript">
+        var vlSpec = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "title": {
+                "text": "PM2.5 Monthly Concentrations in Major Indian Cities (2023)",
+                "subtitle": "Interactive: Click legend to filter cities\n-Drage on the chart to select the time period",
+                "fontSize": 18,
+                "subtitleFontSize": 13
+            },
+            "width": 1200,
+            "height": 500,
+            "data": {
+                "url": "./pm25_timeseries_data.csv",
+                "format": {"type": "csv", "parse": {"Date": "date"}}
+            },
+            "params": [
+                {
+                    "name": "city_selection",
+                    "select": {"type": "point", "fields": ["City"]},
+                    "bind": "legend"
+                },
+                {
+                    "name": "date_range",
+                    "select": {
+                        "type": "interval",
+                        "encodings": ["x"]
+                    }
+                }
+            ],
+            "transform": [
+                {
+                    "filter": {"param": "date_range"}
+                }
+            ],
+            "layer": [
+                {
+                    "mark": {
+                        "type": "line",
+                        "point": true,
+                        "strokeWidth": 3
+                    },
+                    "encoding": {
+                        "x": {
+                            "field": "Date",
+                            "type": "temporal",
+                            "axis": {
+                                "title": "Month (2023)",
+                                "titleFontSize": 14,
+                                "titleFontWeight": "bold",
+                                "labelAngle": -45,
+                                "format": "%b",
+                                "grid": true
+                            }
+                        },
+                        "y": {
+                            "field": "PM2_5",
+                            "type": "quantitative",
+                            "scale": {"domain": [0, 170]},
+                            "axis": {
+                                "title": "PM2.5 Concentration (μg/m^3)",
+                                "titleFontSize": 14,
+                                "titleFontWeight": "bold",
+                                "grid": true
+                            }
+                        },
+                        "color": {
+                            "field": "City",
+                            "type": "nominal",
+                            "scale": {
+                                "domain": ["Delhi", "Mumbai", "Kolkata", "Bangalore", "Chennai", "Hyderabad"],
+                                "range": ["#e74c3c", "#3498db", "#f39c12", "#2ecc71", "#9b59b6", "#1abc9c"]
+                            },
+                            "legend": {
+                                "title": "Select Cities (Click to Filter)",
+                                "titleFontSize": 13,
+                                "titleFontWeight": "bold",
+                                "labelFontSize": 12,
+                                "orient": "right"
+                            }
+                        },
+                        "opacity": {
+                            "condition": {"param": "city_selection", "value": 1},
+                            "value": 0.1
+                        },
+                        "strokeWidth": {
+                            "condition": {"param": "city_selection", "value": 3},
+                            "value": 1
+                        },
+                        "tooltip": [
+                            {"field": "City", "type": "nominal", "title": "City"},
+                            {"field": "Month_Name", "type": "nominal", "title": "Month"},
+                            {"field": "PM2_5", "type": "quantitative", "title": "PM2.5 (μg/m^3)", "format": ".1f"},
+                            {"field": "Season", "type": "nominal", "title": "Season"},
+                            {"field": "Event_Type", "type": "nominal", "title": "Event"}
+                        ]
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "rule",
+                        "color": "#e74c3c",
+                        "strokeWidth": 2,
+                        "strokeDash": [8, 4]
+                    },
+                    "encoding": {
+                        "y": {"datum": 75}
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "text",
+                        "align": "left",
+                        "dx": 5,
+                        "dy": -5,
+                        "fontSize": 11,
+                        "fontWeight": "bold",
+                        "color": "#e74c3c"
+                    },
+                    "encoding": {
+                        "x": {"datum": {"year": 2023, "month": 1}},
+                        "y": {"datum": 75},
+                        "text": {"value": "WHO Unhealthy Threshold (75 μg/m^3)"}
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "rule",
+                        "color": "#f39c12",
+                        "strokeWidth": 2,
+                        "strokeDash": [8, 4]
+                    },
+                    "encoding": {
+                        "y": {"datum": 35}
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "text",
+                        "align": "left",
+                        "dx": 5,
+                        "dy": -5,
+                        "fontSize": 11,
+                        "fontWeight": "bold",
+                        "color": "#f39c12"
+                    },
+                    "encoding": {
+                        "x": {"datum": {"year": 2023, "month": 1}},
+                        "y": {"datum": 35},
+                        "text": {"value": "WHO Moderate Threshold (35 μg/m^3)"}
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "text",
+                        "align": "center",
+                        "fontSize": 10,
+                        "fontWeight": "bold",
+                        "color": "#e74c3c",
+                        "dy": -10
+                    },
+                    "data": {
+                        "values": [
+                            {"date": "2023-10-15", "value": 140, "label": "Post-Diwali Spike"}
+                        ]
+                    },
+                    "encoding": {
+                        "x": {"field": "date", "type": "temporal"},
+                        "y": {"field": "value", "type": "quantitative"},
+                        "text": {"field": "label", "type": "nominal"}
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "text",
+                        "align": "center",
+                        "fontSize": 10,
+                        "fontWeight": "bold",
+                        "color": "#f39c12",
+                        "dy": -10
+                    },
+                    "data": {
+                        "values": [
+                            {"date": "2023-11-15", "value": 120, "label": "Stubble Burning"}
+                        ]
+                    },
+                    "encoding": {
+                        "x": {"field": "date", "type": "temporal"},
+                        "y": {"field": "value", "type": "quantitative"},
+                        "text": {"field": "label", "type": "nominal"}
+                    }
+                }
+            ]
+        };
+
+        vegaEmbed('#vis', vlSpec, {
+            "actions": false
+        }).then(function(result) {
+            console.log("Visualization rendered successfully");
+        }).catch(console.error);
+    </script>
+</body>
+</html>"

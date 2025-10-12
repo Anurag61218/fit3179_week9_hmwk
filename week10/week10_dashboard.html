@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PM2.5 Air Quality Dashboard - Indian Cities</title>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        h1{
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        .subtitle{
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        .viz-section {
+            margin-bottom: 50px;
+        }
+        .viz-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+        }
+        .viz-description {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        #timeseries, #map {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        .info-box {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        .info-box h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+        .info-box p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PM2.5 Air Quality Dashboard - Indian Cities</h1>
+        <div class="subtitle">
+            Interactive visualizations showing spatial and temporal patterns of air pollution.<br>- Data from WHO Ambient Air Quality Database V6.1 (2024)
+        </div>
+
+        <!-- Task 1: Interactive Time Series Visualization -->
+         <div class="viz-section">
+            <div class="viz-title">Monthly PM2.5 Trends Across Major Cities (2023)</div>
+            <div class="info-box">
+                <h3>Interactive Features:</h3>
+                <p><strong>- Legend Selection:</strong> Click on city names to show/hide specific cities</p>
+                <p><strong>- Date Range Slider:</strong> User the slider below to filter data by time period</p>
+                <p><strong>- Tooltips:</strong> Hover over the data points for detailed information</p>
+                <p><strong>- Annotations:</strong> Key pollution events are marked on the chart</p>
+            </div>
+            <div class="viz-description">
+                This chart shows monthly PM2.5 concentration trends for six major Indian cities throughout 2023.<br>
+                Notice the seasonal patterns with higher pollution in winter months (November-February) and lower levels during monsoon season (June-August).<br>
+                Key events like Diwali celebrations and agricultural stubble burning significantly impacts the level of pollution.
+            </div>
+            <div id="timeseries"></div>
+         </div>
+
+         <!-- Task 2: Map from Week9 -->
+         <div class="viz-section">
+            <div class="viz-title">Spatial Distribution of PM2.5 Pollution (Annual Mean 2023)</div>
+            <div class="viz-description">
+                This proportional symbol map shows the geographic distribution of annual mean PM2.5 concentrations across 20 major Indian cities.
+                Circle sizes represent pollution levels, with colors indicating WHO air quality categories. Indo-Gangetic Plain cities (like Delhi, Kolkata, Patna) show the highest pollution levels.
+            </div>
+            <div id="map"></div>
+         </div>
+    </div>
+
+    <script type="text/javascript">
+        //Task 1: Advanced Interactive Time Series Visualization
+        var timeseriesSpec = {
+            "$schema": "https://vega.github.io/scehma/vega-lite/v5.json",
+            "title": {
+                "text": "PM2.5 Monthly Concentrations in Major Indian Cities",
+                "subtitle": "Interactive: Click the legend to filter cities\n- Drag the slider to select the time period",
+                "font-size": 18,
+                "subtitleFontSize": 13,
+                "anchor": "start",
+                "color": "#2c3e50",
+                "subtitleColor": "#7f8c8d"
+            },
+            "width": 1200,
+            "height": 500,
+            "data": {
+                "url": "./pm25_timeseries_data.csv",
+                "format": {"type": "csv", "parse": {"Date": "date"}}
+            },
+            "params": [
+                {
+                    "name": "city_selection",
+                    "select": {"type": "point", "fields": ["City"]},
+                    "bind": "legend"
+                },
+                {
+                    "name": "date_range",
+                    "value": [{"year": 2023, "month": 1}, {"year": 2023, "month": 12}],
+                    "select": {
+                        "type": "interval",
+                        "encodings": ["x"]
+                    }
+                }
+            ],
+            "transform": [
+                {
+                    "filter": {"param": "date_range"}
+                }
+            ],
+            "layer": [
+                {
+                    "mark": {
+                        "type": "line",
+                        "point": true,
+                        "strokeWidth": 3
+                    } ,
+                    "encoding": {
+                        "x": {
+                            "field": "Date",
+                            "type": "temporal",
+                            "axis": {
+                                "title": "Month(2023)",
+                                "titleFontSize": 14,
+                                "titleFontWeight": "bold",
+                                "labelAngle": -45,
+                                "format": "%b",
+                                "grid": true,
+                                "gridOpacity": 0.3
+                            }
+                        },
+                        "y": {
+                            "field": "PM2_5",
+                            "type": "quantitative",
+                            "scale": {"domain": [0, 170]},
+                            "axis": {
+                                "title": "PM2.5 Concentration (μg/m^3)",
+                                "titleFontSize": 14,
+                                "titleFontWeight": "bold",
+                                "grid": true,
+                                "gridOpacity": 0.5
+                            }
+                        },
+                        "color": {
+                            "field": "City",
+                            "type": "nominal",
+                            "scale": {
+                                "domain": ["Delhi", "Mumbai", "Kolkata", "Bangalore", "Chennai", "Hyderabad"],
+                                "range": ["#e74c3c", "#3498bd", "#f39c12", "#2ecc71", "#9b59b6", "#1abc9c"]
+                            },
+                            "legend": {
+                                "title": "Select Cities",
+                                "titleFontSize": 13,
+                                "titleFontWeight": "bold",
+                                "labelFontSize": 12,
+                                "orient": "right",
+                                "symbolSize": 150,
+                                "symbolStrokeWidth": 2
+                            }
+                        },
+                        "opacity": {
+                            "condition": {"param": "city_selection", "value": 1},
+                            "value": 0.1
+                        },
+                        "strokeWidth": {
+                            "condition": {"param": "city_selection", "value": 3},
+                            "value": 1
+                        },
+                        "tooltip": [
+                            {"field": "City", "type": "nominal", "title": "City"},
+                            {"field": "Month_Name", "type": "nominal", "title": "Month"},
+                            {"field": "PM2_5", "type": "quantitative", "title": "PM2.5 (μg/m^3)", "fomrat": ".1f"},
+                            {"field": "Season", "type": "nominal", "title": "Season"},
+                            {"field": "Event_Type", "type": "nominal", "title": "Event"}
+                        ]
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "rule",
+                        "color": "#e74c3c",
+                        "strokeWidth": 2,
+                        "strokeDash": [8,4]
+                    },
+                    "encoding": {
+                        "y": {"datum": 75}
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "text",
+                        "align": "left",
+                        "dx": 5,
+                        "dy": -5,
+                        "fontSize": 11,
+                        "fontWeight": "bold",
+                        "color": "#e74c3c"
+                    },
+                    "encoding": {
+                        "x": {"datum": {"year": 2023, "month": 1}},
+                        "y": {"datum": 75},
+                        "text": {"value": "WHO Unhealthy Threshold (75 μg/m^3)"}
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "rule",
+                        "color": "#f39c12",
+                        "strokeWidth": 2,
+                        "strokeDash": [8,4]
+                    },
+                    "encoding": {
+                        "y": {"datum": 35}
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "text",
+                        "align": "left",
+                        "dx": 5,
+                        "dy": -5,
+                        "fontSize": 11,
+                        "fontWeight": "bold",
+                        "color": "#f39c12"
+                    },
+                    "encoding": {
+                        "x": {"datum": {"year": 2023, "month": 1}},
+                        "y": {"datum": 35},
+                        "text": {"value": "WHO Moderate Threshold (35 μg/m^3)"}
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "rule",
+                        "color": "#2ecc71",
+                        "strokeWidth": 2,
+                        "strokeDash": [8, 4]
+                    },
+                    "encoding": {
+                        "y": {"datum": 15}
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "text",
+                        "align": "left",
+                        "dx": 5,
+                        "dy": -5,
+                        "fontSize": 11,
+                        "fontWeight": "bold",
+                        "color": "#2ecc71"
+                    },
+                    "encoding": {
+                        "x": {"datum": {"year": 2023, "month": 1}},
+                        "y": {"datum": 15},
+                        "text": {"value": "WHO Good Air Quality (15 μg/m^3)"}
+                    }
+                },
+                {
+                    "data": {
+                        "values": [
+                            {"date": "2023-10-15", "value": 140, "label": "Post-Diwali\nPollution Spike"}
+                        ]
+                    },
+                    "mark": {
+                        "type": "text",
+                        "align": "center",
+                        "fontSize": 10,
+                        "fontWeight": "bold",
+                        "color": "#e74c3c",
+                        "dy": -10
+                    },
+                    "encoding": {
+                        "x": {"field": "date", "type": "temporal"},
+                        "y": {"field": "value", "type": "quantitative"},
+                        "text": {"field": "label", "type": "nominal"}
+                    }
+                },
+                {
+                    "data": {
+                        "values": [
+                            {"date": "2023-11-15", "value": 120, "label": "Stubble Burning\nSeason"}
+                        ]
+                    },
+                    "mark": {
+                        "type": "text",
+                        "align": "center",
+                        "fontSize": 10,
+                        "fontWeight": "bold",
+                        "color": "#f39c12",
+                        "dy": -10
+                    },
+                    "encoding": {
+                        "x": {"field": "date", "type": "temporal"},
+                        "y": {"field": "value", "type": "quantitative"},
+                        "text": {"field": "label", "type": "nominal"}
+                    }
+                }
+            ]
+        };
+
+        //Task 2: Map from Week 9
+        var mapSpec = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "title": {
+                "text": "PM2.5 Air Pollution in Major Indian Cities (Annual Mean 2023)",
+                "subtitle": "Circle size proportional to PM2.5 concentration\n- Colors based on WHO air quality guidelines",
+                "fontSize": 16,
+                "subtitleFontSize": 12,
+                "anchor": "start",
+                "color": "#2c3e50",
+                "subtitleColor": "#7f8c8d"
+            },
+            "width": 1200,
+            "height": 650,
+            "projection": {
+                "type": "mercator",
+                "center": [78, 20],
+                "scale": 1100
+            },
+            "layer": [
+                {
+                    "data": {
+                        "url": "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"
+                    },
+                    "mark": {
+                        "type": "geoshape",
+                        "fill": "#e8e8e8",
+                        "stroke": "#999999",
+                        "strokeWidth": 0.5
+                    }
+                },
+                {
+                    "data": {
+                        "graticule": {"step": [10, 10]}
+                    },
+                    "mark": {
+                        "type": "geoshape",
+                        "fill": null,
+                        "stroke": "#cccccc",
+                        "strokeWidth": 0.3,
+                        "strokeOpacity": 0.7
+                    }
+                },
+                {
+                    "data": {
+                        "url": "./india_air_quality_subdataset.csv",
+                        "format": {"type": "csv"}
+                    },
+                    "mark": {
+                        "type": "circle",
+                        "opacity": 0.85,
+                        "stroke": "white",
+                        "strokeWidth": 2
+                    },
+                    "encoding": {
+                        "longitude": {"field": "Longitude", "type": "quantitative"},
+                        "latitude": {"field": "Latitude", "type": "quantitative"},
+                        "size": {
+                            "field": "PM2_5_Annual_Mean",
+                            "type": "quantitative",
+                            "scale": {
+                                "type": "linear",
+                                "range": [150, 900],
+                                "domain": [30, 110]
+                            },
+                            "legend": {
+                                "title": "PM2.5 (μg/m^3)",
+                                "titleFontSize": 12,
+                                "titleFontWeight": "bold",
+                                "labelFontSize": 10,
+                                "orient": "bottom-left",
+                                "offset": 10
+                            }
+                        },
+                        "color": {
+                            "field": "PM2_5_Annual_Mean",
+                            "type": "quantitative",
+                            "scale": {
+                                "type": "threshold",
+                                "domain": [15, 35, 75],
+                                "range": ["#2ecc71", "#f39c12", "#e67e22", "#c0392b"]
+                            },
+                            "legend": {
+                                "title": "WHO Air Quality Category",
+                                "titleFontSize": 12,
+                                "titleFontWeight": "bold",
+                                "labelFontSize": 10,
+                                "orient": "bottom-right",
+                                "offset": 10,
+                                "values": [15, 35 ,75],
+                                "labelExpr": "datum.value == 15 ? 'Good (<=15)' : datum.value == 35 ? 'Moderate (15-35)' : datum.value == 75 ? 'Unhealthy (35-75)' : 'Very Unhealthy (>75)'"
+                            }
+                        },
+                        "tooltip": [
+                            {"field": "City", "type": "nominal", "title": "City"},
+                            {"field": "State", "type": "nominal", "title": "State"},
+                            {"field": "PM2_5_Annual_Mean", "type": "quantitative", "title": "PM2.5 (μg/m^3)", "format": ".1f"},
+                            {"field": "PM10_Annual_Mean", "type": "quantitative", "title": "PM10 (μg/m^3)", "format": ".1f"},
+                            {"field": "Population_Category", "type": "nominal", "title": "Population"},
+                            {"field": "Source_Station_Count", "type": "quantitative", "title": "Monitoring Stations"}
+                        ]
+                    }
+                }
+            ]
+        };
+
+        //Here we render both the visualizations
+        vegaEmbed('#timeseries', timeseriesSpec, {
+            "actions": false,
+            "theme": "latimes"
+        }).then(function(result) {
+            console.log("Time series visualization rendered successfully");
+        }).catch(console.error);
+
+        vegaEmbed('#map', mapSpec, {
+            "actions": false,
+            "theme": "latimes"
+        }).then(function(result) {
+            console.log("Map visualization rendered successfully");
+        }).catch(console.error);
+    </script>
+</body>
+</html>
